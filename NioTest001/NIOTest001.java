@@ -1,7 +1,7 @@
 import java.nio.*;
 /*
 *一, 缓冲区(Buffer)的概念:
-     缓冲区在NIO周负责存储数据，然后在一种类似现实中铁轨的上来回传送数据，与IO单向水管式的传送有区别；
+     缓冲区在NIO中负责存储数据，相当于火车车厢，然后在一种类似现实中铁轨的上来回传送数据，与IO单向水管式的传送有区别；
 
 *二, 根据数据类型不同提供不同的缓冲区类型(没有boolean的buffer)
      ByteBuffer
@@ -22,6 +22,15 @@ import java.nio.*;
 	 mark : 标记，表示记录当前position的位置。可通过reset()方法恢复到mark的位置
 	 大小关系
 	 0 <= mark <= position <= limit <= capacity
+*五, 非直接缓冲区和直接缓冲区
+	 (1)非直接缓冲区，指由JVM在其分配一块内存来给NIO当缓冲区用，
+	    优点是可直接操作，这块内存可控
+		缺点是速度慢，因为这块内存的数据还要复制到系统管理的内存，再传到硬盘里；
+		使用 allocate(..)方法
+	 (2)直接缓冲区，指直接调用系统的一块内存作为缓冲区
+	    优点：速度快
+		缺点：不可控，NIO程序把数据传到这块内存后，什么时候存到硬盘就有系统决定了。
+		使用 allocateDirect(..)方法
 
 */
 
@@ -33,6 +42,8 @@ public class NIOTest001 {
 		testBuffer();
 		System.out.println("分割线=====================");
 		testBuffer02();
+		System.out.println("分割线,测试直接缓冲区=====================");
+		testAllocateDirect();
 	}
 
 	public static void testBuffer(){
@@ -42,10 +53,10 @@ public class NIOTest001 {
 		ByteBuffer buf = ByteBuffer.allocate(1024);  //1024 bytes
 		System.out.println("***********allocate(1024)*********");
 		System.out.println("position==>" + buf.position());  //结果：0，下标从0开始
-		System.out.println("limit==>" + buf.limit());        //结果：1024，
+		System.out.println("limit==>" + buf.limit());        //结果：1024，  limit()方法
 		System.out.println("capacity==>" + buf.capacity());  //结果：1024，容量
 		
-		//2, 把String类型数据放到缓存, 需要将其转换成byte类型
+		//2, 把String类型数据放到缓存, 需要将其转换成最小单位byte类型
 		System.out.println("**********put(..)**********");
 		buf.put(str.getBytes());
 		System.out.println("position==>" + buf.position());  //结果：7，下标从0开始，position箭头指在将要读写的位置，即"g"后面的位置，
@@ -60,7 +71,7 @@ public class NIOTest001 {
 		System.out.println("capacity==>" + buf.capacity());  //结果：1024，容量
 
 		//4, 调用get(..)方法读取数据
-		byte[] bytes = new byte[buf.limit()];  //初始化一个数组
+		byte[] bytes = new byte[buf.limit()];  //初始化一个数组，设置数组的容量和缓存的相等
 		buf.get(bytes);   //读取数据放到这个数组中
 		System.out.println("**********get(..)**********");
 		System.out.println("bytes==>" + new String(bytes,0,buf.limit()));  //把数组转换为字符串，结果"abcdefg"
@@ -91,7 +102,7 @@ public class NIOTest001 {
 
 
 	public static void testBuffer02(){
-		/*8，remark()方法的用法:
+		/*8，mark()方法的用法:
 		  标记当前positon箭头指向的位置，后面调用reset()方法会恢复到此位置
 		*/
 		String  str = "abcde";
@@ -99,7 +110,7 @@ public class NIOTest001 {
 
 		buffer.put(str.getBytes());
 		byte[] bytes = new byte[buffer.limit()];
-		
+
 		//注意转换为读缓存模式一定记得调用flip()方法
 		buffer.flip();
 
@@ -122,5 +133,20 @@ public class NIOTest001 {
 		int remainingNum = buffer.remaining();
 		System.out.println("remaining==>" + remainingNum);   //输出：3，因为上面reset()方法执行了，position在2的位置
 
+	}
+
+	//直接缓冲区范例
+	public static void testAllocateDirect(){
+		ByteBuffer directBuffer = ByteBuffer.allocateDirect(1024);  //分配直接缓冲区
+		String abc = "abcdefgh";
+		System.out.println("isDirect==>" + directBuffer.isDirect());
+		directBuffer.put(abc.getBytes());
+		System.out.println("directBuffer's postion==>" + directBuffer.position());
+		//调用flip()方法，准备读取数据到数组里
+		directBuffer.flip();
+		byte[] bytes = new byte[directBuffer.limit()];  
+		directBuffer.get(bytes);
+		System.out.println("bytes==>" + new String(bytes));
+		
 	}
 }
