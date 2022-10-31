@@ -35,7 +35,7 @@ import java.nio.*;
 */
 
 
-public class NIOTest001 {
+public class ByteBufferTest {
 
 	public static void main(String[] args){
 		

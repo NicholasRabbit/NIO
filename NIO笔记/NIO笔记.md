@@ -22,7 +22,7 @@ NIO传输的原理
 
 传统的IO, 以及NIO的allocate(1024)方法是在JVM种开辟一块缓冲区，底层实际是在堆内存中
 
-而NIO的allocatiDirect(..)方法是在物理内存中直接开辟一块缓冲区，有点是块，缺点耗费资源
+而NIO的allocatiDirect(..)方法是在物理内存中直接开辟一块缓冲区，优点是快，缺点耗费资源
 
 ![image-20220105222031681](note-images/image-20220105222031681.png)
 
