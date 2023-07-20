@@ -34,8 +34,30 @@ NIO传输的原理
 
 ### 4,通道示意图
 
+一，最早的IO通信是IO接口直接和CPU交互，CPU既要保存数据，还要开辟线程进行数据传输
+
+<img src="note-images/1689834007971.png" alt="1689834007971" style="zoom:50%;" />
+
+二，Java老的IO流引入了DMA(Direct Memory Access)
+
+**什么是DMA?**
+
+DMA机制，允许硬盘（或者其它外设）中的数据直接传输到内存中，DMA允许硬盘，显卡，网卡等可以共享和获得内存中的数据，而不需要CPU的参与，减少了CPU的占用，使其能处理其它事情。
+
+如果没有DMA的话，像上面第一种方式，硬盘或其它设备中的数据直接请求CPU，CPU再把数据放到内存，这期间就会被占用不能处理其它事情了，DMA就是直接硬盘中的数据放到内存，减少了CPU的工作，CPU直接从内存拿数据进行处理就行了。
+
+参考：https://www.techtarget.com/whatis/definition/Direct-Memory-Access-DMA
+
+<img src="note-images/1689834007971.png" alt="1689834007971" style="zoom:50%;" />
+
+
+
+<img src="note-images/1689835230044.png" alt="1689835230044" style="zoom:50%;" />
+
+三，Java 的NIO引入了Channel通道
+
 通道类似于原来IO流的通道，本身没有存储数据，只是传输缓冲区中的数据。
 
 跟铁轨的作用一样，传送车厢，车厢中存有货物。
 
-![Snipaste_2022-05-31_23-00-51.jpg](./note-images/Snipaste_2022-05-31_23-08-38.jpg)
+<img src="./note-images/Snipaste_2022-05-31_23-08-38.jpg" alt="Snipaste_2022-05-31_23-00-51.jpg" style="zoom:50%;" />
